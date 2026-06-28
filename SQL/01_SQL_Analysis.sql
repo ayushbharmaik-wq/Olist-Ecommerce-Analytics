@@ -1,45 +1,8 @@
-﻿-- ============================================================
---  OLIST E-COMMERCE  |  SQL SERVER
---  Phase 1 — CSV Import + Analysis Queries
--- ============================================================
-
+﻿
 USE OlistEcommerce;
+
 GO
 
--- ============================================================
--- PART A: HOW TO IMPORT CSVs INTO SSMS
--- ============================================================
-/*
-IMPORT ORDER (follow this exact sequence due to foreign keys):
-
-  1. product_category_name_translation
-  2. olist_customers
-  3. olist_geolocation
-  4. olist_sellers
-  5. olist_products
-  6. olist_orders
-  7. olist_order_items
-  8. olist_order_payments
-  9. olist_order_reviews
-
-STEPS IN SSMS:
-  1. Right-click your database → Tasks → Import Flat File
-  2. Browse to the CSV file
-  3. Set table name to match exactly (e.g. olist_customers)
-  4. Preview columns & confirm data types match the schema
-  5. Click Finish
-
-  ⚠️  TIP: If Import Flat File gives errors, use:
-       Tasks → Import Data → Flat File Source
-       This gives more control over delimiters & data types.
-
-  ⚠️  For olist_order_reviews: set review_comment_message 
-       to nvarchar(MAX) to avoid truncation errors.
-*/
-
--- ============================================================
--- PART B: ROW COUNT CHECK (run after import)
--- ============================================================
 SELECT 'olist_customers'                   AS table_name, COUNT(*) AS row_count FROM olist_customers
 UNION ALL
 SELECT 'olist_geolocation',                               COUNT(*) FROM olist_geolocation
@@ -60,7 +23,7 @@ SELECT 'olist_order_reviews',                             COUNT(*) FROM olist_or
 
 
 -- ============================================================
--- PART C: ANALYSIS QUERIES
+-- ANALYSIS QUERIES
 -- ============================================================
 
 -- ── Q1: Overall Business KPIs ──────────────────────────────
@@ -264,7 +227,7 @@ HAVING COUNT(r.review_id) > 100
 ORDER BY avg_score DESC;
 
 -- ============================================================
--- PART D: TIME SERIES DATASET FOR PYTHON FORECASTING
+-- TIME SERIES DATASET FOR PYTHON FORECASTING
 -- ============================================================
 
 -- Monthly revenue dataset for ARIMA / SARIMA / Holt-Winters
@@ -279,8 +242,8 @@ WITH monthly_order_revenue AS (
         SUM(i.price + i.freight_value)  AS order_value,
         SUM(i.price)                    AS product_revenue,
         SUM(i.freight_value)            AS freight_revenue,
-        SUM(i.price)                    AS total_price_sum,      -- for exact avg
-        COUNT(i.order_item_id)          AS total_items           -- for exact avg
+        SUM(i.price)                    AS total_price_sum,    
+        COUNT(i.order_item_id)          AS total_items          
     FROM olist_orders o
     JOIN olist_order_items i
         ON o.order_id = i.order_id
@@ -316,7 +279,7 @@ LEFT JOIN review_summary r
 GROUP BY m.order_month
 ORDER BY m.order_month;
 
---- RFM SCORE
+-- ── Q12:RFM SCORE  ─────────────
 WITH rfm AS (
     SELECT
         c.customer_unique_id,
@@ -360,7 +323,7 @@ SELECT *,
 FROM rfm_scores
 ORDER BY rfm_total_score DESC;
 
---cancelation analysis by month
+-- Q:13 :cancelation analysis by month
 SELECT
     DATEFROMPARTS(
         YEAR(order_purchase_timestamp),
@@ -400,7 +363,7 @@ GROUP BY DATEFROMPARTS(
 )
 ORDER BY order_month;
 
--- Monthly New vs Returning Customers
+--Q 14: Monthly New vs Returning Customers─────────────
 WITH first_order AS (
     SELECT
         c.customer_unique_id,
