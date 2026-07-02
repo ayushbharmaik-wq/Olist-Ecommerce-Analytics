@@ -1,0 +1,6 @@
+customer_segment,total_customers,avg_recency_days,avg_frequency,total_monetary_value,avg_monetary_value,avg_rfm_score
+Others,29977,297.38,1.02,4777550.01,159.37,8.1
+At Risk,26039,380.16,1.04,4317972.39,165.83,8.27
+New Customers,21318,86.93,1.0,3540454.11,166.08,8.97
+Loyal Customers,10191,91.84,1.02,975601.05,95.73,10.96
+Best Customers,5833,97.36,1.2,1808196.19,309.99,13.61
